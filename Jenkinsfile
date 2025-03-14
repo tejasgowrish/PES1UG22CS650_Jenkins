@@ -1,26 +1,34 @@
 pipeline {
-  agent any
-  stages {
-    stage('Build') {
-      steps {
-        build 'pes1ug22cs650-1'
-        sh 'g++ main.cpp -o output'
-      }
+    agent any
+    stages {
+        stage('Clone repository') {
+            steps {
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    useRemoteConfigs: [[url: 'https://github.com/tejasgowrish/PES1UG22CS650_Jenkins.git']]
+                ])
+            }
+        }
+        stage('Build') {
+            steps {
+                build 'PES1UG22CS650-1'
+                sh 'g++ main/hello.cpp -o output'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh './output'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'deploy'
+            }
+        }
     }
-    stage('Test') {
-      steps {
-        sh './output'
-      }
+    post {
+        failure {
+            error 'Pipeline failed'
+        }
     }
-    stage('Deploy') {
-      steps {
-        echo 'deploy'
-      }
-    }
-  }
-  post {
-    failure {
-        error 'Pipeline failed'
-    }
-  }
 }
